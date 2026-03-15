@@ -35,7 +35,7 @@ jobs:
         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         projectName: ai-background-remover
-        directory: public
+        directory: out
         gitHubToken: ${{ secrets.GITHUB_TOKEN }}
         branch: main
         
