@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Background Remover Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .result-area {
+            border: 1px solid #ddd;
+            padding: 20px;
+            min-height: 200px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        .success {
+            color: green;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI 背景移除工具测试</h1>
+    
+    <div class="container">
+        <div>
+            <h2>原始图片</h2>
+            <div class="upload-area">
+                <input type="file" id="imageInput" accept="image/*">
+                <p>选择图片</p>
+            </div>
+            <div id="imagePreview"></div>
+            <button id="processBtn" disabled>移除背景</button>
+            <div id="error" class="error"></div>
+        </div>
+        
+        <div>
+            <h2>处理结果</h2>
+            <div class="result-area" id="resultArea">
+                <p>处理结果将显示在这里</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const processBtn = document.getElementById('processBtn');
+        const resultArea = document.getElementById('resultArea');
+        const errorDiv = document.getElementById('error');
+
+        let selectedImageData = null;
+
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    selectedImageData = e.target.result;
+                    imagePreview.innerHTML = `<img src="${selectedImageData}" style="max-width: 100%; height: auto;">`;
+                    processBtn.disabled = false;
+                    errorDiv.textContent = '';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        processBtn.addEventListener('click', async function() {
+            if (!selectedImageData) {
+                errorDiv.textContent = '请先选择图片';
+                return;
+            }
+
+            processBtn.disabled = true;
+            errorDiv.textContent = '';
+            
+            try {
+                const formData = new FormData();
+                formData.append('image', selectedImageData);
+
+                const response = await fetch('http://43.128.96.249:3000/api/remove-background', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    resultArea.innerHTML = `
+                        <div>
+                            <h3>处理成功！</h3>
+                            <img src="${result.result.processedImageUrl}" style="max-width: 100%; height: auto; border: 1px solid #ccc;">
+                            <p><strong>置信度:</strong> ${(result.result.confidence * 100).toFixed(1)}%</p>
+                            <p><strong>处理时间:</strong> ${result.result.processingTime}s</p>
+                            <p><strong>时间戳:</strong> ${new Date(result.timestamp).toLocaleString()}</p>
+                        </div>
+                    `;
+                    errorDiv.className = 'success';
+                    errorDiv.textContent = '处理完成！';
+                } else {
+                    errorDiv.textContent = result.error || '处理失败';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorDiv.textContent = '网络错误，请重试';
+            } finally {
+                processBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

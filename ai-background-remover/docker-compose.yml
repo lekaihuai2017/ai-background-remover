@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - CLOUDFLARE_PAGES=true
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run dev
+
+  # 可选：添加 Redis 用于缓存
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
