@@ -37,6 +37,7 @@ jobs:
         projectName: ai-background-remover
         directory: out
         gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+        branch: main
         
     - name: Upload deployment status
       if: always()

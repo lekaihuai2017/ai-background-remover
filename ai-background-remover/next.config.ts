@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  output: 'export',
   // 启用实验性功能以支持Pages Functions
   serverExternalPackages: [],
   images: {
@@ -32,6 +32,9 @@ const nextConfig = {
       },
     ];
   },
+  // 优化Cloudflare Pages部署
+  trailingSlash: true,
+  skipTrailingSlashRedirect: true,
 };
 
 export default nextConfig;

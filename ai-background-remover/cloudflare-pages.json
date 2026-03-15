@@ -1,0 +1,8 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "out",
+  "framework": {
+    "name": "next",
+    "version": "16.1.6"
+  }
+}
