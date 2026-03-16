@@ -66,9 +66,13 @@ export async function onRequestPost(context) {
 
     // 将返回的 PNG 转为 base64 data URL
     const imageBuffer = await response.arrayBuffer();
-    const base64Image = btoa(
-      String.fromCharCode(...new Uint8Array(imageBuffer))
-    );
+    const uint8 = new Uint8Array(imageBuffer);
+    let binary = '';
+    const chunkSize = 8192;
+    for (let i = 0; i < uint8.length; i += chunkSize) {
+      binary += String.fromCharCode(...uint8.subarray(i, i + chunkSize));
+    }
+    const base64Image = btoa(binary);
     const processedImageUrl = `data:image/png;base64,${base64Image}`;
 
     // 读取 remove.bg 返回的积分信息
